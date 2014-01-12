@@ -1,0 +1,62 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <meta charset ="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge"> 
+        <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+    </head>
+    <body>
+        {{ if not session.email: }}
+            <a href="#" id="signin">Sign In</a>
+        {{ else: }}
+            <p>You are logged as {{=session.email }}</p>
+            <a href="#" id="signout">Sign Out</a>
+        {{ pass }}
+
+        <script>
+          function init(){
+            function verifyAssertion(assertion){
+                $.post("{{=URL('login')}}", {assertion:assertion}, function (data, textStatus){
+                    if ('success' == textStatus){
+                        window.location.reload();
+                        } else {
+                        navigator.id.logout();
+                    }
+
+                }, 'json');
+            }
+
+            function signoutUser() {
+                $.post("{{=URL('logout')}}", {}, function (data){
+                    window.loction.reload();
+                });
+            }
+
+            navigator.id.watch({
+                {{ if session.email: }}
+                    loggedInUser: '{{session.email}}',
+                {{ else: }}
+                    loggedInUser: null, 
+                {{pass}}
+                onlogin: verifyAssertion,
+                onlogout: signoutUser
+            })
+            var signIn = document.getElementById('signin');
+            var signOut = document.getElementById('signout');
+
+            if (signIn){
+                signIn.onclick = function() { navigator.id.request(); }
+            } else if(signOut){
+                signOut.onclick = function() { navigator.id.logout(); };
+            }
+
+          }
+
+          $('document').ready(function(){
+              init();
+          });
+        </script>    
+        <script src="https://login.persona.org/include.js"></script>
+    </body>
+</html>
